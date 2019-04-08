@@ -1,7 +1,7 @@
 import aiohttp
 import yarl
 import json
-import creds
+import os
 
 
 emojis = {
@@ -25,7 +25,7 @@ async def get_json(uri, timeout=60):
 async def get_guild_roster(realm_slug, guild_name):
     async with aiohttp.ClientSession() as session:
         async with session.get(
-                f'https://eu.api.blizzard.com/wow/guild/{realm_slug}/{guild_name}?fields=members&locale=en_GB&access_token={creds.JB_BNET_TOKEN}'
+                f'https://eu.api.blizzard.com/wow/guild/{realm_slug}/{guild_name}?fields=members&locale=en_GB&access_token={os.environ["JB_BNET_TOKEN"]}'
         ) as guild_req:
             guild = json.loads(await guild_req.text())
             if guild_req.status == 404:
@@ -89,3 +89,4 @@ def color_pick(score):
         return 0xffffff
     else:
         return None
+

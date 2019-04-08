@@ -1,12 +1,12 @@
+import os
 import discord
+import asyncio
 from discord.ext import commands
 from cogs.administration import Admin
 from cogs.guild_roster_updates import GRU
 from lib.database_manager import DBM
 from cogs.music import Music
 from lib import background_tasks
-import creds
-import asyncio
 
 
 class JovankaBroz(commands.Bot):
@@ -67,4 +67,5 @@ bot.add_cog(Admin(bot))
 bot.add_cog(GRU(bot))
 bot.add_cog(Music(bot))
 
-bot.run(creds.JB_DISC_TOKEN, bot=True, reconnect=True)
+bot.run(os.environ['JB_DISC_TOKEN'], bot=True, reconnect=True)
+
