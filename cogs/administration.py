@@ -16,9 +16,13 @@ class Admin(commands.Cog):
         member_role = await DBM.get_on_join_role(member.guild)
         for role in member.guild.roles:
             if member_role.lower() == role.name.lower():
-                await member.add_roles(role, reason='Default role koji daje Jovanka Broz')
+                await member.add_roles(
+                    role, reason='Default role koji daje Jovanka Broz')
 
-    @commands.group(name='settings', aliases=['s'], invoke_without_command=True, help='Command subgroup for WoW\'s guilds')
+    @commands.group(name='settings',
+                    aliases=['s'],
+                    invoke_without_command=True,
+                    help='Command subgroup for WoW\'s guilds')
     async def settings(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send('Invalid Settings command passed...')
@@ -29,17 +33,22 @@ class Admin(commands.Cog):
         settings = await DBM.guild_settings_get(ctx.guild.id)
         # Show current message if available
         try:
-            await ctx.send("Trenutno ovo šaljem novim članovima:\n\n" + settings['on_join']['msg'])
+            await ctx.send("Trenutno ovo šaljem novim članovima:\n\n" +
+                           settings['on_join']['msg'])
             # Prompt
-            prompt = await ctx.send("Da li želite da promenim tu poruku u ovo?\n\n" + msg)
+            prompt = await ctx.send(
+                "Da li želite da promenim tu poruku u ovo?\n\n" + msg)
             await prompt.add_reaction('👍')
             await prompt.add_reaction('👎')
 
             def check(reaction, user):
-                return user == ctx.author and (str(reaction.emoji) == '👍' or str(reaction.emoji) == '👎')
+                return user == ctx.author and (str(reaction.emoji) == '👍'
+                                               or str(reaction.emoji) == '👎')
 
             try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+                reaction, user = await self.bot.wait_for('reaction_add',
+                                                         timeout=60.0,
+                                                         check=check)
             except asyncio.TimeoutError:
                 reaction = '👎'
                 await ctx.send('Dosta sam čekala... Neću menjati poruku.')
@@ -59,27 +68,36 @@ class Admin(commands.Cog):
     @settings.command(name='joinrole', aliases=['jr'])
     async def settings_on_join_role(self, ctx, *, rolename):
         # Check if role exists on server
-        if not [role for role in ctx.guild.roles if role.name.lower() == rolename.lower()]:
+        if not [
+                role for role in ctx.guild.roles
+                if role.name.lower() == rolename.lower()
+        ]:
             await ctx.send(f"Role {rolename} ne postoji na ovom serveru.")
             return
         # Get settings
         settings = await DBM.guild_settings_get(ctx.guild.id)
         # Show current message if available
         try:
-            await ctx.send(f"Trenutni default role je {settings['on_join']['role']}")
+            await ctx.send(
+                f"Trenutni default role je {settings['on_join']['role']}")
             # Prompt
-            prompt = await ctx.send(f"Da li želite da promenim default role u {rolename.title()}")
+            prompt = await ctx.send(
+                f"Da li želite da promenim default role u {rolename.title()}")
             await prompt.add_reaction('👍')
             await prompt.add_reaction('👎')
 
             def check(reaction, user):
-                return user == ctx.author and (str(reaction.emoji) == '👍' or str(reaction.emoji) == '👎')
+                return user == ctx.author and (str(reaction.emoji) == '👍'
+                                               or str(reaction.emoji) == '👎')
 
             try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+                reaction, user = await self.bot.wait_for('reaction_add',
+                                                         timeout=60.0,
+                                                         check=check)
             except asyncio.TimeoutError:
                 reaction = '👎'
-                await ctx.send('Dosta sam čekala... Neću menjati default role.')
+                await ctx.send('Dosta sam čekala... Neću menjati default role.'
+                               )
 
             if reaction.emoji == '👎':
                 print(reaction.emoji)

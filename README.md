@@ -6,6 +6,8 @@ Discord bot representing brotherhood and unity.
 
 * [Opus Interactive Audio Codec](https://opus-codec.org/)
 * [FFmpeg](https://ffmpeg.org/)
+* [Redis](https://redis.io/)
+* [MongoDB](https://www.mongodb.com/)
 
 Detailed documentation and installation instructions can be found on their respective web
 pages, but for quick start you can use:
@@ -25,8 +27,10 @@ You can easily deploy this bot to Heroku by flowing these steps:
 5. Login into Container Registry with `heroku container:login`
 6. Set Discord Bot token as environment variable `heroku config:set JB_DISC_TOKEN="your token"`
 7. Set Battle.net token as environment variable `heroku config:set JB_BNET_TOKEN="your token"`
-8. Push your container with `heroku container:push worker`
-9. And then release it with `heroku container:release worker`
-10. Start worker dyno by running `heroku ps:scale worker=1`
-11. Enjoy!
+8. Activate Redis addon `heroku addons:create heroku-redis:hobby-dev`
+9. Activate MongoDB addon `heroku addons:create mongolab:sandbox`
+10. Push your container with `heroku container:push worker`
+11. And then release it with `heroku container:release worker`
+12. Start worker dyno by running `heroku ps:scale worker=1`
+13. Enjoy!
 

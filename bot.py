@@ -1,24 +1,27 @@
 import os
-import discord
 import asyncio
+
+import discord
 from discord.ext import commands
+
+from lib.database_manager import DBM
+from lib import background_tasks
 from cogs.administration import Admin
 from cogs.guild_roster_updates import GRU
-from lib.database_manager import DBM
 from cogs.music import Music
-from lib import background_tasks
 
 
 class JovankaBroz(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.version = "v0.1"
-        # create the background task and run it in the background
-        self.bg_task = self.loop.create_task(self.atb_apps())
-        self.bg_task = self.loop.create_task(self.roster_changes())
+
+        self.loop.create_task(self.roster_changes())
+        self.loop.create_task(self.atb_apps())
 
     async def on_ready(self):
-        await self.change_presence(activity=discord.Game(name='Zivela Jugoslavija!'))
+        await self.change_presence(activity=discord.Game(
+            name='Zivela Jugoslavija!'))
 
         print('---------------------')
         print(f'Ulogovala sam se kao {self.user.name} ({self.user.id})')
@@ -26,9 +29,6 @@ class JovankaBroz(commands.Bot):
         print(f'Trenutno sam na tacno {len(self.guilds)} servera...!')
         print('---------------------')
 
-        # for guild in self.guilds:
-        #     await DBM.guild_settings_init(guild.id, guild.name)
-    
     async def on_message(self, message):
         await self.process_commands(message)
 
@@ -68,4 +68,3 @@ bot.add_cog(GRU(bot))
 bot.add_cog(Music(bot))
 
 bot.run(os.environ['JB_DISC_TOKEN'], bot=True, reconnect=True)
-

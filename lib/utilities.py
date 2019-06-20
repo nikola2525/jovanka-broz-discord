@@ -1,38 +1,11 @@
-import aiohttp
-import yarl
-import json
-import os
-
-
 emojis = {
     'goldcoins': '<:goldcoins:487736737485946880>',
-    'youtube'  : '<:youtube:487738563379593218>',
-
+    'youtube': '<:youtube:487738563379593218>',
 }
 
 
 def get_emoji(name):
     return emojis[name]
-
-
-async def get_json(uri, timeout=60):
-    print('Requesting JSON ->', yarl.URL(uri))
-    async with aiohttp.ClientSession() as session:
-        async with session.get(str(yarl.URL(uri)), timeout=timeout) as json_request:
-            return json.loads(await json_request.text())
-
-
-async def get_guild_roster(realm_slug, guild_name):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-                f'https://eu.api.blizzard.com/wow/guild/{realm_slug}/{guild_name}?fields=members&locale=en_GB&access_token={os.environ["JB_BNET_TOKEN"]}'
-        ) as guild_req:
-            guild = json.loads(await guild_req.text())
-            if guild_req.status == 404:
-                print('Guild not found')
-                return 404, 'Not Found'
-            # print(guild['members'])
-            return guild['members']
 
 
 def color_pick(score):
@@ -89,4 +62,3 @@ def color_pick(score):
         return 0xffffff
     else:
         return None
-

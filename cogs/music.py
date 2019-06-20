@@ -27,13 +27,11 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'source_address':
+    '0.0.0.0'  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
-ffmpeg_options = {
-    'before_options': '-nostdin',
-    'options': '-vn'
-}
+ffmpeg_options = {'before_options': '-nostdin', 'options': '-vn'}
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
@@ -48,32 +46,33 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(
+            None, lambda: ytdl.extract_info(url, download=not stream))
         if 'entries' in data:
             # take first item from a playlist
             data = data['entries'][0]
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options),
+                   data=data)
 
     @classmethod
     async def song_name(cls, search, ctx, loop=None):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(search, download=False))
+        data = await loop.run_in_executor(
+            None, lambda: ytdl.extract_info(search, download=False))
         try:
             data = data['entries'][0]
         except KeyError:
             # It's the only result
             pass
-        song = Song(
-            ctx,
-            filename=ytdl.prepare_filename(data),
-            title=data['title'],
-            url=data['webpage_url'],
-            uploader=data['uploader'],
-            thumbnail=data['thumbnail'],
-            duration=data['duration'],
-            views=data['view_count']
-        )
+        song = Song(ctx,
+                    filename=ytdl.prepare_filename(data),
+                    title=data['title'],
+                    url=data['webpage_url'],
+                    uploader=data['uploader'],
+                    thumbnail=data['thumbnail'],
+                    duration=data['duration'],
+                    views=data['view_count'])
         return song
 
     @classmethod
@@ -84,9 +83,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         # hrefs, filters out the /watch ones (duplicates handled with set())
         # and once that's done, appends 'youtube.com' to the result and
         # removes everything after the '&' in watch link
-        return set(['youtube.com' + href.split('&')[0] for link in
-                    bs4.BeautifulSoup(requests.get(user_link).content, 'html.parser').find_all('a') for href in
-                    link.get('href').split('\n') if 'watch' in href])
+        return set([
+            'youtube.com' + href.split('&')[0] for link in bs4.BeautifulSoup(
+                requests.get(user_link).content, 'html.parser').find_all('a')
+            for href in link.get('href').split('\n') if 'watch' in href
+        ])
 
     @classmethod
     def download(cls, url):
@@ -94,7 +95,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class Song:
-    def __init__(self, ctx, filename=None, title=None, url=None, uploader=None, thumbnail=None, duration=None, views=None):
+    def __init__(self,
+                 ctx,
+                 filename=None,
+                 title=None,
+                 url=None,
+                 uploader=None,
+                 thumbnail=None,
+                 duration=None,
+                 views=None):
         self.ctx = ctx
         self.sid = ctx.guild.id
         self.owner = ctx.author
@@ -103,7 +112,8 @@ class Song:
         self.url = url
         self.uploader = uploader
         self.thumbnail = thumbnail
-        self.duration = str(datetime.timedelta(seconds=duration))  # Converts to min:sec
+        self.duration = str(
+            datetime.timedelta(seconds=duration))  # Converts to min:sec
         self.views = views
 
     def __str__(self):
@@ -113,69 +123,39 @@ class Song:
         return str(self.title)
 
     async def make_embed_playing(self, queue):
-        embed = discord.Embed(
-            title='',
-            description='',
-            color=0x33cc33
-        )
-        embed.set_image(
-            url=self.thumbnail
-        )
+        embed = discord.Embed(title='', description='', color=0x33cc33)
+        embed.set_image(url=self.thumbnail)
         embed.set_author(
             name=f'Sad sviram: {self.title} ({self.duration})',
             url=self.url,
         )
-        embed.add_field(
-            name='Uploader',
-            value=self.uploader,
-            inline=True
-        )
-        embed.add_field(
-            name='Pregledi',
-            value=self.views,
-            inline=True
-        )
-        up_next = queue[0].title if queue else 'Izgleda da nema ništa u redu čekanja'
-        embed.add_field(
-            name='Sledeće što puštam:',
-            value=up_next
-        )
+        embed.add_field(name='Uploader', value=self.uploader, inline=True)
+        embed.add_field(name='Pregledi', value=self.views, inline=True)
+        up_next = queue[
+            0].title if queue else 'Izgleda da nema ništa u redu čekanja'
+        embed.add_field(name='Sledeće što puštam:', value=up_next)
 
         embed.set_footer(
-            text=f'Klip pustio: {self.owner.nick if self.owner.nick else self.owner.name}'
+            text=
+            f'Klip pustio: {self.owner.nick if self.owner.nick else self.owner.name}'
         )
         embed.timestamp = datetime.datetime.utcnow()
         return embed
 
     async def make_embed_queued(self, queue):
-        embed = discord.Embed(
-            title='',
-            description='',
-            color=0xe6e600
-        )
-        embed.set_thumbnail(
-            url=self.thumbnail
-        )
+        embed = discord.Embed(title='', description='', color=0xe6e600)
+        embed.set_thumbnail(url=self.thumbnail)
         embed.set_author(
             name=f'U redu čekanja - {self.title} ({self.duration})',
             url=self.url,
         )
-        embed.add_field(
-            name='Uploader',
-            value=self.uploader,
-            inline=True
-        )
-        embed.add_field(
-            name='Pregledi',
-            value=self.views,
-            inline=True
-        )
-        embed.add_field(
-            name='Pozicija u redu',
-            value=f'Trenutno je na mestu #{len(queue)}'
-        )
+        embed.add_field(name='Uploader', value=self.uploader, inline=True)
+        embed.add_field(name='Pregledi', value=self.views, inline=True)
+        embed.add_field(name='Pozicija u redu',
+                        value=f'Trenutno je na mestu #{len(queue)}')
         embed.set_footer(
-            text=f'Klip pustio: {self.owner.nick if self.owner.nick else self.owner.name}'
+            text=
+            f'Klip pustio: {self.owner.nick if self.owner.nick else self.owner.name}'
         )
         embed.timestamp = datetime.datetime.utcnow()
         return embed
@@ -192,7 +172,8 @@ class Music(commands.Cog):
     # Returns a discord.PCMVolumeTransformer object to play
     async def _get_player(self, song: Song):
         if os.path.exists(f'{song.filename}'):
-            return discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song.filename))
+            return discord.PCMVolumeTransformer(
+                discord.FFmpegPCMAudio(song.filename))
         else:
             async with song.ctx.typing():
                 return await YTDLSource.from_url(song.url, loop=self.bot.loop)
@@ -203,7 +184,8 @@ class Music(commands.Cog):
             next_song = self.song_queue[song.sid][1]
             print(next_song.title)
             if not os.path.exists(f'{next_song.filename}'):
-                threading.Thread(target=YTDLSource.download, args=(next_song.title,)).start()
+                threading.Thread(target=YTDLSource.download,
+                                 args=(next_song.title, )).start()
                 print(f'Downloaded {next_song.title}')
         except IndexError:
             pass
@@ -215,7 +197,9 @@ class Music(commands.Cog):
     # Notifies users that it finished playing and leaves voice channel
     async def _finished_playing(self, ctx):
         self.now_playing = None
-        await ctx.send(f':x: Završila sam sa sviranjem, odoh! **__{ctx.guild.voice_client.channel.name}__**!')
+        await ctx.send(
+            f':x: Završila sam sa sviranjem, odoh! **__{ctx.guild.voice_client.channel.name}__**!'
+        )
         await ctx.voice_client.disconnect()
 
     # Plays a song (local+downloaded)
@@ -237,29 +221,32 @@ class Music(commands.Cog):
             # Play next if queue isn't empty
             if queue:
                 now_playing = queue.pop(0)
-                self.bot.loop.create_task(
-                    self._play_song(now_playing)
-                )
+                self.bot.loop.create_task(self._play_song(now_playing))
                 self.now_playing = now_playing
             # Notify user and disconnect otherwise
             else:
-                self.bot.loop.create_task(
-                    self._finished_playing(song.ctx)
-                )
+                self.bot.loop.create_task(self._finished_playing(song.ctx))
 
         # Notify the user and play the song
         if song.ctx.voice_client:
             if not song.ctx.voice_client.is_playing():
                 song.ctx.voice_client.play(player, after=after)
                 if song.ctx.guild.voice_client.is_connected():
-                    await song.ctx.send(embed=await song.make_embed_playing(self.song_queue[song.sid]))
+                    await song.ctx.send(embed=await song.make_embed_playing(
+                        self.song_queue[song.sid]))
 
     @commands.cooldown(rate=1, per=3, type=BucketType.user)
-    @commands.command(name='play', aliases=['p', 'stream'],help='Plays a song from YouTube - You can use URLs or song names (picks the first result)')
+    @commands.command(
+        name='play',
+        aliases=['p', 'stream'],
+        help=
+        'Plays a song from YouTube - You can use URLs or song names (picks the first result)'
+    )
     async def play(self, ctx, *, url):
         # @play.before_invoke functions below - ensure_voice()
         playlist = False
-        msg = await ctx.send(f'{u.get_emoji("youtube")}:mag_right: Searching...')
+        msg = await ctx.send(
+            f'{u.get_emoji("youtube")}:mag_right: Searching...')
         '''------------- String formatting the input -------------'''
         # Check if it's a playlist
         if 'playlist?list=' in url:
@@ -279,31 +266,38 @@ class Music(commands.Cog):
 
         # Bot is connected (probably redundant due to ensure_voice func below)
         if ctx.voice_client:
-            url = url.replace(':', '')  # semi-colon breaks this for whatever reason
+            url = url.replace(':',
+                              '')  # semi-colon breaks this for whatever reason
             # Get filename and song title
             if playlist:
                 async with ctx.typing():
                     for playlist_song in all_songs:
                         # Get all the song metadata
-                        song = await YTDLSource.song_name(playlist_song, ctx, loop=self.bot.loop)
+                        song = await YTDLSource.song_name(playlist_song,
+                                                          ctx,
+                                                          loop=self.bot.loop)
                         # Add the song to the que instantly
                         self.song_queue[song.sid].append(song)
                         if len(self.song_queue[song.sid]) < 2:
                             for song in self.song_queue[song.sid]:
                                 if not os.path.exists(f'{song.filename}'):
-                                    threading.Thread(target=YTDLSource.download, args=(song.title,)).start()
+                                    threading.Thread(
+                                        target=YTDLSource.download,
+                                        args=(song.title, )).start()
                                     print(f'Downloaded {song.title}')
                         # Play if nothing is playing while we do stuff in the background
-                        if not ctx.voice_client.is_playing() and playlist_song == all_songs[0]:
+                        if not ctx.voice_client.is_playing(
+                        ) and playlist_song == all_songs[0]:
                             self.now_playing = song
                             await self._play_song(
-                                self.song_queue[song.sid].pop(0)
-                            )
+                                self.song_queue[song.sid].pop(0))
                             await msg.delete()
                     await ctx.send(f'Vaša plejlista je sada u redu\n')
             else:
                 async with ctx.typing():
-                    song = await YTDLSource.song_name(url, ctx, loop=self.bot.loop)
+                    song = await YTDLSource.song_name(url,
+                                                      ctx,
+                                                      loop=self.bot.loop)
 
                     if not ctx.voice_client.is_playing():
                         self.now_playing = song
@@ -312,24 +306,34 @@ class Music(commands.Cog):
                     else:
                         # Download if not available locally
                         if not os.path.exists(f'{song.filename}'):
-                            threading.Thread(target=YTDLSource.download, args=(url,)).start()
+                            threading.Thread(target=YTDLSource.download,
+                                             args=(url, )).start()
                             print(f'Downloaded {song.title}')
                         # Add to que
-                        self.song_queue[song.sid].append(song)  # Tries to append
+                        self.song_queue[song.sid].append(
+                            song)  # Tries to append
                         # Inform the invoker
                         await msg.delete()
-                        await ctx.send(embed=await song.make_embed_queued(self.song_queue[song.sid]))
+                        await ctx.send(embed=await song.make_embed_queued(
+                            self.song_queue[song.sid]))
 
     @commands.cooldown(rate=1, per=3, type=BucketType.user)
-    @commands.command(name='stop', aliases=['disconnect', 'dc'], help='Stops the music and disconnects the bot from the voice channel')
+    @commands.command(
+        name='stop',
+        aliases=['disconnect', 'dc'],
+        help='Stops the music and disconnects the bot from the voice channel')
     async def stop(self, ctx):
         self.now_playing = None
-        await ctx.send(f"Zaustavljam muziku i otišla sam sa glasa - **__{ctx.guild.voice_client.channel.name}__**.")
+        await ctx.send(
+            f"Zaustavljam muziku i otišla sam sa glasa - **__{ctx.guild.voice_client.channel.name}__**."
+        )
         await self._clear_que(ctx.guild.id)
         await ctx.voice_client.disconnect()
 
     @commands.cooldown(rate=1, per=3, type=BucketType.user)
-    @commands.command(name='skip', help='Skips the current song and plays the next one in queue')
+    @commands.command(
+        name='skip',
+        help='Skips the current song and plays the next one in queue')
     async def skip(self, ctx):
         if ctx.voice_client is None:
             await ctx.send(":x: Nisam na glasovnom kanalu.")
@@ -339,13 +343,19 @@ class Music(commands.Cog):
         owner = self.now_playing.owner
 
         if author.id == owner.id:
-            await ctx.send(':fast_forward: Preskačem (trazio onaj ko je pustio pesmu)')
+            await ctx.send(
+                ':fast_forward: Preskačem (trazio onaj ko je pustio pesmu)')
             ctx.voice_client.stop()
         else:
             if self.skip_counter == 0:
-                ctx.send(f':confetti_ball: {author.mention} je pokrenuo glasanje! :confetti_ball:')
-            voice_members = [member for member in ctx.voice_client.channel.members if member != self.bot.user]
-            required_skips = math.ceil(len(voice_members)/2)
+                ctx.send(
+                    f':confetti_ball: {author.mention} je pokrenuo glasanje! :confetti_ball:'
+                )
+            voice_members = [
+                member for member in ctx.voice_client.channel.members
+                if member != self.bot.user
+            ]
+            required_skips = math.ceil(len(voice_members) / 2)
             if author.id not in self.skip_voters:
                 self.skip_counter += 1
                 self.skip_voters.append(author.id)
@@ -356,19 +366,26 @@ class Music(commands.Cog):
                 await ctx.send(':fast_forward: Preskačem (dovoljno glasova)')
                 ctx.voice_client.stop()
             else:
-                await ctx.send(f'Glasova potrebno - **{self.skip_counter}/{required_skips}**')
+                await ctx.send(
+                    f'Glasova potrebno - **{self.skip_counter}/{required_skips}**'
+                )
 
     @commands.command(name='himna', help='Jugoslovenska himna')
     async def himna(self, ctx):
         for c in self.get_commands():
             if c.name == "play":
-                await ctx.invoke(c, url='https://www.youtube.com/watch?v=ery50XdRORw')
+                await ctx.invoke(
+                    c, url='https://www.youtube.com/watch?v=ery50XdRORw')
 
-    @commands.command(name='queue', aliases=['que'], help='Shows the current song queue')
+    @commands.command(name='queue',
+                      aliases=['que'],
+                      help='Shows the current song queue')
     async def queue(self, ctx):
         sid = ctx.message.guild.id
         if ctx.voice_client:
-            songs = "\n".join('{}. {}'.format(i+1, str(self.song_queue[sid][i])) for i in range(len(self.song_queue[sid])))
+            songs = "\n".join('{}. {}'.format(i +
+                                              1, str(self.song_queue[sid][i]))
+                              for i in range(len(self.song_queue[sid])))
             if len(songs) > 2000:
                 songs = songs[:1900] + '...'
 
@@ -384,7 +401,9 @@ class Music(commands.Cog):
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
-                await ctx.send(f":white_check_mark: Priključila sam se na glasovni kanal - **__{ctx.author.voice.channel.name}__**.")
+                await ctx.send(
+                    f":white_check_mark: Priključila sam se na glasovni kanal - **__{ctx.author.voice.channel.name}__**."
+                )
                 await ctx.author.voice.channel.connect()
                 # Initialize a queue
                 try:
@@ -394,6 +413,7 @@ class Music(commands.Cog):
                 self.skip_counter = 0
             else:
                 await ctx.send(":x: Niste na glasovnom kanalu.")
-                raise commands.CommandError("Author not connected to a voice channel.")
+                raise commands.CommandError(
+                    "Author not connected to a voice channel.")
 
         print('Ensured voice')
