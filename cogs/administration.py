@@ -10,10 +10,10 @@ class Admin(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        server_message = await DBM.get_on_join_message(member.guild)
+        server_message = await DBM.get_on_join_message(member.guild.id)
         await member.send(server_message)
 
-        member_role = await DBM.get_on_join_role(member.guild)
+        member_role = await DBM.get_on_join_role(member.guild.id)
         for role in member.guild.roles:
             if member_role.lower() == role.name.lower():
                 await member.add_roles(
