@@ -88,6 +88,19 @@ class DBM:
         return settings
 
     @staticmethod
+    async def get_on_join_message(guild_id):
+        settings = await DBM.db['discord_server_settings'].find_one(
+            {"guild_id": guild_id})
+        return settings['on_join']['msg']
+
+    @staticmethod
+    async def get_on_join_role(guild_id):
+        settings = await DBM.db['discord_server_settings'].find_one(
+            {"guild_id": guild_id})
+        return settings['on_join']['role']
+
+
+    @staticmethod
     async def guild_settings_set(guild_id, key, value):
         search_filter = {"guild_id": guild_id}
         await DBM.db['discord_server_settings'].find_one_and_update(
