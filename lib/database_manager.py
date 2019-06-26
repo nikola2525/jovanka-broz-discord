@@ -1,5 +1,6 @@
-import motor.motor_asyncio
 from os import environ
+
+import motor.motor_asyncio
 from uritools import urisplit
 
 
