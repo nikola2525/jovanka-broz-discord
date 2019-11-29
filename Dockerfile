@@ -1,8 +1,11 @@
-FROM python:3.7
+FROM python:3.7-slim
 RUN apt-get update && \
-        apt-get install -y libopus0 ffmpeg
-ADD . /bot
+        apt-get -y install \
+        libopus0 ffmpeg \
+        && rm -rf /var/lib/apt/lists/*
 WORKDIR /bot
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-CMD ["python", "-u", "bot.py"]
+COPY src ./src
+CMD ["python", "-u", "src/bot.py"]
 
