@@ -7,7 +7,7 @@ from uritools import urisplit
 class DBM:
     connection_uri = environ['MONGODB_URI']
     db_name = urisplit(connection_uri).path[1:]
-    client = motor.motor_asyncio.AsyncIOMotorClient(connection_uri, retry_writes=False)
+    client = motor.motor_asyncio.AsyncIOMotorClient(connection_uri, retryWrites=False)
 
     db = client[db_name]
 
