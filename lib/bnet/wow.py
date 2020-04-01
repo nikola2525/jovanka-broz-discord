@@ -37,7 +37,7 @@ async def fetch_wow_resource(resource,
             'fields': fields,
             'access_token': token.token
         }
-        url = 'https://' + region + '.api.blizzard.com/wow/' + resource + '/' + realm + '/' + name
+        url = 'https://' + region + '.api.blizzard.com/data/wow/' + resource + '/' + realm + '/' + name
         async with client.get(url, params=params) as response:
             if 200 <= response.status <= 299:
                 json = await response.json()
