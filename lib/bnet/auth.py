@@ -22,13 +22,13 @@ class AccessToken:
         return self.expiration_date <= datetime.now()
 
 
-async def fetch_fresh_token():
+async def fetch_fresh_token(region):
     client_id = environ['BNET_CLIENT_ID']
     r.set('bnet_client_id', client_id)
     client_secret = environ['BNET_CLIENT_SECRET']
     auth = aiohttp.BasicAuth(client_id, password=client_secret)
     async with aiohttp.ClientSession(auth=auth) as client:
-        async with client.post('https://us.battle.net/oauth/token',
+        async with client.post('https://' + region + '.battle.net/oauth/token',
                                data={'grant_type':
                                      'client_credentials'}) as response:
             assert response.status == 200
@@ -36,18 +36,18 @@ async def fetch_fresh_token():
             return AccessToken(json)
 
 
-async def get_access_token():
+async def get_access_token(region):
     raw_token = r.get(get_token_key())
 
     if raw_token is None:
-        token = await fetch_fresh_token()
+        token = await fetch_fresh_token(region)
         r.set(get_token_key(), pickle.dumps(token))
         return token
     else:
         token = pickle.loads(raw_token)
         if token.is_expired():
             invalidate_current_token()
-            get_access_token()
+            get_access_token(region)
         else:
             return token
 
