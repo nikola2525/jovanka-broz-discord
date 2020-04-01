@@ -35,7 +35,8 @@ async def fetch_wow_resource(resource,
         params = {
             'locale': locale,
             'fields': fields,
-            'access_token': token.token
+            'access_token': token.token,
+            'namespace': 'profile-' + region
         }
         url = 'https://' + region + '.api.blizzard.com/data/wow/' + resource + '/' + realm + '/' + name
         async with client.get(url, params=params) as response:
