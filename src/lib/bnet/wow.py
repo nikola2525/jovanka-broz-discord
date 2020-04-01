@@ -11,14 +11,11 @@ class InvalidResponse(Exception):
         self.params = params
 
     def __str__(self):
-        print(self.code)
-        print(self.message)
-        print(self.url)
-        print(self.params)
-        return 'Status: {0} ({1}): {2}'.format(
+        return 'Status: {0} ({1}): {2} {3}'.format(
             self.code,
             self.message,
-            self.url
+            self.url,
+            str(self.params)
         )
 
 
@@ -51,10 +48,12 @@ async def fetch_wow_resource(resource,
             'access_token': token.token,
             'namespace': 'profile-' + region
         }
-        url = 'https://' + region + '.api.blizzard.com/data/wow/' + resource + '/' + realm + '/' + name
+        url = 'https://' + region + '.api.blizzard.com/data/wow/' + \
+            resource + '/' + realm + '/' + name
         async with client.get(url, params=params) as response:
             if 200 <= response.status <= 299:
                 json = await response.json()
                 return json
             else:
-                raise InvalidResponse(response.reason, response.status, url, params)
+                raise InvalidResponse(
+                    response.reason, response.status, response.url, params)

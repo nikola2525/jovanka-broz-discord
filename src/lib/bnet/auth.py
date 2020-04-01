@@ -46,27 +46,27 @@ async def get_access_token(region):
     else:
         token = pickle.loads(raw_token)
         if token.is_expired():
-            invalidate_current_token()
+            invalidate_current_token(region)
             get_access_token(region)
         else:
             return token
 
 
-def invalidate_current_token():
-    r.delete(get_token_key())
+def invalidate_current_token(region):
+    r.delete(get_token_key(region))
 
 
 def get_token_key(region):
     client_id = r.get('bnet_client_id') or 'unknown'
-    return region + 'bnet_access_token_%s' % client_id
+    return '%s_bnet_access_token_%s' % (region, client_id)
 
 
-async def main():
-    token = await get_access_token()
+async def main(region):
+    token = await get_access_token(region)
     print(token.token)
     print(token.expiration_date)
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(main('eu'))
