@@ -31,7 +31,7 @@ async def fetch_wow_resource(resource,
                              region='eu',
                              locale='en_GB'):
     async with aiohttp.ClientSession() as client:
-        token = await get_access_token()
+        token = await get_access_token(region)
         params = {
             'locale': locale,
             'fields': fields,
