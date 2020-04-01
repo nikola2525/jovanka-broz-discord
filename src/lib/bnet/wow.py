@@ -11,6 +11,10 @@ class InvalidResponse(Exception):
         self.params = params
 
     def __str__(self):
+        print(self.code)
+        print(self.message)
+        print(self.url)
+        print(self.params)
         return 'Status: {0} ({1}): {2} {3}'.format(
             self.code,
             self.message,
