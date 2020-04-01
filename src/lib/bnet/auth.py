@@ -37,11 +37,11 @@ async def fetch_fresh_token(region):
 
 
 async def get_access_token(region):
-    raw_token = r.get(get_token_key())
+    raw_token = r.get(get_token_key(region))
 
     if raw_token is None:
         token = await fetch_fresh_token(region)
-        r.set(get_token_key(), pickle.dumps(token))
+        r.set(get_token_key(region), pickle.dumps(token))
         return token
     else:
         token = pickle.loads(raw_token)
@@ -56,9 +56,9 @@ def invalidate_current_token():
     r.delete(get_token_key())
 
 
-def get_token_key():
+def get_token_key(region):
     client_id = r.get('bnet_client_id') or 'unknown'
-    return 'bnet_access_token_%s' % client_id
+    return region + 'bnet_access_token_%s' % client_id
 
 
 async def main():
