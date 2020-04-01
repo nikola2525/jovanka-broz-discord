@@ -4,9 +4,14 @@ from .auth import get_access_token
 
 
 class InvalidResponse(Exception):
-    def __init__(self, message, code):
+    def __init__(self, message, code, url, params):
         super().__init__(message)
         self.code = code
+        self.url = url
+        self.params = params
+
+    def __str__(self):
+        return 'Status: ' + self.code + '(' + self.message + '): ' + self.url + self.params
 
 
 async def fetch_guild_profile(realm, name, fields, region='eu',
@@ -44,4 +49,4 @@ async def fetch_wow_resource(resource,
                 json = await response.json()
                 return json
             else:
-                raise InvalidResponse(response.reason, response.status)
+                raise InvalidResponse(response.reason, response.status, url, params)
