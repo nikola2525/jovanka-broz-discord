@@ -5,7 +5,7 @@ from .auth import get_access_token
 
 class InvalidResponse(Exception):
     def __init__(self, message, code, url, params):
-        super().__init__(message)
+        self.message = message
         self.code = code
         self.url = url
         self.params = params
@@ -15,11 +15,10 @@ class InvalidResponse(Exception):
         print(self.message)
         print(self.url)
         print(self.params)
-        return 'Status: {0} ({1}): {2} {3}'.format(
+        return 'Status: {0} ({1}): {2}'.format(
             self.code,
             self.message,
-            self.url,
-            self.params
+            self.url
         )
 
 
