@@ -1,6 +1,7 @@
 import aiohttp
 
 from .auth import get_access_token
+from .slugify import slugify
 
 
 class InvalidResponse(Exception):
@@ -37,19 +38,19 @@ async def fetch_character_profile(realm,
 async def fetch_wow_resource(resource,
                              realm,
                              name,
-                             fields,
+                             subresource,
                              region='eu',
                              locale='en_GB'):
     async with aiohttp.ClientSession() as client:
+        name = slugify(name)
         token = await get_access_token(region)
         params = {
             'locale': locale,
-            'fields': fields,
             'access_token': token.token,
             'namespace': 'profile-' + region
         }
         url = 'https://' + region + '.api.blizzard.com/data/wow/' + \
-            resource + '/' + realm + '/' + name
+            resource + '/' + realm + '/' + name + '/' + subresource
         async with client.get(url, params=params) as response:
             if 200 <= response.status <= 299:
                 json = await response.json()

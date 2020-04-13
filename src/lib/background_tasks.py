@@ -20,8 +20,7 @@ async def new_atb_apps(bot):
             embed.set_author(
                 name='Nova prijava: {} ({})'.format(app['personal_name'],
                                                     app['yob']),
-                icon_url=
-                'https://cdn0.iconfinder.com/data/icons/large-weather-icons/256/Heat.png'
+                icon_url='https://cdn0.iconfinder.com/data/icons/large-weather-icons/256/Heat.png'
             )
 
             embed.add_field(
@@ -106,7 +105,7 @@ async def guild_roster_check(bot):
         guild_name, realm_slug = guild.split('-', 1)
         # Retrieve current members of a specified guild from Blizzard API
         guild = await bnet.fetch_guild_profile(realm_slug, guild_name,
-                                               'members')
+                                               'roster')
         bnet_guild_roster = guild['members']
         # Get the roster from the database
         db_guild_roster = DBM.db['guild_roster_current'].find({
@@ -171,8 +170,7 @@ async def guild_sub_announcer(bot, guild_info, joined, left):
     embed = discord.Embed(
         title=' ', description=' ', color=u.color_pick(3300)
     ).set_author(
-        name=
-        f'{guild_info["guild_name"].title()} on {guild_info["realm_slug"].title()}',
+        name=f'{guild_info["guild_name"].title()} on {guild_info["realm_slug"].title()}',
         url='',
     )
     print(joined)
