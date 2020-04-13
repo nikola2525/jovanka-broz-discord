@@ -11,7 +11,7 @@ class GRU(commands.Cog):
 
     async def guild_exists(self, realm_slug, guild_name):
         try:
-            await bnet.fetch_guild_profile(realm_slug, guild_name, 'members')
+            await bnet.fetch_guild_profile(realm_slug, guild_name, 'roster')
             return True
         except bnet.InvalidResponse as error:
             if error.code == 404:
