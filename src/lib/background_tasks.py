@@ -5,6 +5,12 @@ from datetime import datetime
 from lib import bnet
 
 
+def chunks(s, n):
+    """Produce `n`-character chunks from `s`."""
+    for start in range(0, len(s), n):
+        yield s[start:start+n]
+
+
 async def new_atb_apps(bot):
     test_channel = bot.get_channel(509555856816340993)
     # trial_channel = bot.get_channel(421561007522185236)
@@ -173,22 +179,23 @@ async def guild_sub_announcer(bot, guild_info, joined, left):
         name=f'{guild_info["guild_name"].title()} on {guild_info["realm_slug"].title()}',
         url='',
     )
-    print(joined)
     if joined:
-        embed.add_field(
-            name='New members:',
-            value=f'```{", ".join(joined)}```',
-            inline=False,
-        )
-    print(left)
+        joined = ", ".join(joined)
+        for chunk in chunks(joined, 1000):
+            embed.add_field(
+                name='New members:',
+                value=f'```{chunk}```',
+                inline=False,
+            )
     if left:
-        embed.add_field(
-            name='Members that left the guild:',
-            value=f'```{", ".join(left)}```',
-            inline=False,
-        )
+        left = ", ".join(left)
+        for chunk in chunks(left, 1000):
+            embed.add_field(
+                name='Members that left the guild:',
+                value=f'```{chunk}```',
+                inline=False,
+            )
 
-    print('passed users')
     for sub in announce_users:
         print("announcing to user", sub)
         user = bot.get_user(sub['sub_id'])
