@@ -55,6 +55,9 @@ class GRU(commands.Cog):
                 f'Server ({realm_slug.title()}) or Guild ({guild_name.title()}) not found'
             )
 
+async def setup(client):
+    await client.add_cog(GRU(client))
+
 
 if __name__ == '__main__':
     print('Please run the bot.py file')

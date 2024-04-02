@@ -110,6 +110,9 @@ class Admin(commands.Cog):
         # ACK
         await ctx.send("Default role je uspešno promenjen.")
         return
+    
+async def setup(client):
+    await client.add_cog(Admin(client))
 
 
 if __name__ == '__main__':

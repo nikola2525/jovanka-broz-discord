@@ -3,7 +3,6 @@ from os import environ
 import motor.motor_asyncio
 from uritools import urisplit
 
-
 class DBM:
     connection_uri = environ['MONGODB_URI']
     db_name = urisplit(connection_uri).path[1:]

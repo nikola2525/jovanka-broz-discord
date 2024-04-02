@@ -10,61 +10,34 @@ from cogs.administration import Admin
 from cogs.guild_roster_updates import GRU
 from cogs.music import Music
 
+#import sys
+#sys.path.insert(1, 'lib')
+#from database_manager import DBM
+#import background_tasks
 
-class JovankaBroz(commands.Bot):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.version = "v0.1"
+intents = discord.Intents.all()
+intents.message_content = True
 
-        self.loop.create_task(self.roster_changes())
-        self.loop.create_task(self.atb_apps())
+client = commands.Bot(command_prefix = '#',intents=intents)
 
-    async def on_ready(self):
-        await self.change_presence(activity=discord.Game(
-            name='Zivela Jugoslavija!'))
+@client.event
+async def on_ready():
+    print("Jovanka je tu.")
+    
 
-        print('---------------------')
-        print(f'Ulogovala sam se kao {self.user.name} ({self.user.id})')
-        print(f'Verzija: {self.version}')
-        print(f'Trenutno sam na tacno {len(self.guilds)} servera...!')
-        print('---------------------')
+async def load_client_extensions():
+    #for filename in os.listdir('./GreenBot/cogs'):
+    client.remove_command('help')
+    cogsPth = os.path.join(".", "cogs")
+    for filename in os.listdir(cogsPth):
+        if filename.endswith('.py'):
+            await client.load_extension("cogs." + filename[:-3])
+    
 
-    async def on_message(self, message):
-        await self.process_commands(message)
+async def main():
+    async with client:
+        client.loop.create_task(load_client_extensions())
+        await client.start(os.environ['JB_DISC_TOKEN'])
+        #await client.start(os.environ['5ded5436ba52cdf5e698948b7e9978b312688553fc527526bc5a9e1a7517d24b'])
 
-    async def on_guild_join(self, guild):
-        await DBM.guild_settings_init(guild.id, guild.name)
-
-    async def on_member_join(self, member):
-        return
-
-    async def atb_apps(self):
-        await self.wait_until_ready()
-        while not self.is_closed():
-            await background_tasks.new_atb_apps(bot)
-            print('ATB applications have been processed')
-            print('---------------------')
-            await asyncio.sleep(60)  # task runs every 60 seconds
-
-    async def roster_changes(self):
-        await self.wait_until_ready()
-        while not self.is_closed():
-            await background_tasks.guild_roster_check(bot)
-            print('Guild rosters have been checked.')
-            print('---------------------')
-            await asyncio.sleep(60)  # task runs every 60 seconds
-
-
-def get_prefix(bot, message):
-    prefixes = ['!']
-    if not message.guild:
-        return '!'
-    return commands.when_mentioned_or(*prefixes)(bot, message)
-
-
-bot = JovankaBroz(command_prefix=get_prefix, description='Jovanka Broz')
-bot.add_cog(Admin(bot))
-bot.add_cog(GRU(bot))
-bot.add_cog(Music(bot))
-
-bot.run(os.environ['JB_DISC_TOKEN'], bot=True, reconnect=True)
+asyncio.run(main())

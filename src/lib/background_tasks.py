@@ -1,8 +1,16 @@
 import discord
+
+from datetime import datetime
+
 from lib import utilities as u
 from lib.database_manager import DBM
-from datetime import datetime
 from lib import bnet
+
+#import sys
+#sys.path.insert(1, 'lib')
+#import utilities as u
+#from database_manager import DBM
+#import bnet
 
 
 def chunks(s, n):

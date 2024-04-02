@@ -417,3 +417,6 @@ class Music(commands.Cog):
                     "Author not connected to a voice channel.")
 
         print('Ensured voice')
+
+async def setup(client):
+    await client.add_cog(Music(client))
